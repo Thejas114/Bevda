@@ -1,0 +1,53 @@
+pipeline {
+
+    agent any
+
+    environment {
+        dockerImage = "ayusht05/test_2"
+        registry = "ayusht05/test_2"
+        registryCredential = "jenkin_docker_token"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+
+                checkout scmGit(
+                    branches: [[name: '*/main']],
+                    extensions: [],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/AyushThanthri/dockerproj.git'
+                    ]]
+                )
+
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+
+                script {
+                    dockerImage = docker.build(registry)
+                }
+
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+
+                script {
+
+                    docker.withRegistry('', registryCredential) {
+                        dockerImage.push("latest")
+                    }
+
+                }
+
+            }
+        }
+
+    }
+
+}
